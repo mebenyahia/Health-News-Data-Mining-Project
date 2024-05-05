@@ -1,2 +1,2 @@
-# Python
-Code practices and knowledge
+# Health News Project
+Ran in Google Colab with an R kernel. 
