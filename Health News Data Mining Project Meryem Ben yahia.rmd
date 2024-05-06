@@ -1,0 +1,2417 @@
+---
+jupyter:
+  colab:
+  kernelspec:
+    display_name: R
+    name: ir
+  language_info:
+    name: R
+  nbformat: 4
+  nbformat_minor: 0
+---
+
+::: {.cell .markdown id="8oxpTh5VoY3x"}
+\#**Health News in Twitter**
+
+\###**Practical Application of Data Mining and Knowledge Discovery in
+R**
+
+Meryem Ben yahia
+
+## \-\-- {#---}
+:::
+
+::: {.cell .markdown id="YdIxGvKiCmeO"}
+## **References:**
+
+**Plotting:**
+
+-   <https://r-graph-gallery.com/index.html>
+-   <https://r4ds.had.co.nz/data-visualisation.html>
+
+**Text Processing and Data Mining:**
+
+-   <https://www.sciencedirect.com/science/article/pii/S0306437922000461?casa_token=zxjIHyXzzi8AAAAA:D8x3tJqnokGxtl_wgG3F-5sDzuAbIJE942keK-HxlYwIjL-Jt7ahb_pCmZNLMA5Ctd5M1Tmh#b3>
+-   <https://www.datacamp.com/courses/analyzing-social-media-data-in-r>
+
+------------------------------------------------------------------------
+:::
+
+::: {.cell .markdown id="1tfhHcFO_AIg"}
+# **I. Data Understanding** {#i-data-understanding}
+:::
+
+::: {.cell .markdown id="LbtfF8yzpXEk"}
+## **1. Health News Dataset Overview** {#1-health-news-dataset-overview}
+
+**Dataset Name:** Health News in Twitter
+
+**Donation Date:** 2/18/2018
+
+**Collection Date:** 2015
+
+**Data Source:** Twitter API
+
+**Content:** The dataset comprises health news tweets from over 15 major
+health news agencies including BBC, CNN, and NYT. Each agency has its
+own file, named after the agency (e.g., bbchealth.txt for BBC health
+news), where each line contains tweet information in the format of tweet
+id, date and time, and tweet content separated by \'\|\'.
+
+**Characteristics:**
+
+-   **Text**: The dataset consists of textual data in the form of
+    tweets.
+-   **Subject Area**: Primarily focused on health news.
+-   **Associated Tasks**: Suitable for tasks such as clustering and
+    topic modeling.
+-   **Feature Type**: Real data.
+-   **Instances**: 58,000 tweets.
+-   **Features**: 25,000 (approximate number of unique words or features
+    in the dataset).
+
+**Additional Information:** The dataset has been used to assess the
+performance of topic modeling algorithms on short text data. However, it
+can also be utilized for various other tasks such as clustering.
+
+**Missing Values:** No missing values are present in the dataset.
+
+**Access Link:** [UC
+Irvine](https://archive.ics.uci.edu/dataset/438/health+news+in+twitter)
+\| [Github](https://github.com/amir-karami/Health-News-Tweets-Data)
+
+------------------------------------------------------------------------
+:::
+
+::: {.cell .markdown id="oFyg8k8Vq29t"}
+## **1. Importing and Installing Packages** {#1-importing-and-installing-packages}
+:::
+
+::: {.cell .code execution_count="1" id="qoytifRJwdkX"}
+``` python
+options(warn=-1)
+```
+:::
+
+::: {.cell .code execution_count="2" colab="{\"base_uri\":\"https://localhost:8080/\"}" id="OmAYueaIXJF0" outputId="d8b9cb6f-c3de-4869-dbc7-017400b1c024"}
+``` python
+install.packages("text2vec")
+install.packages("qdapRegex")
+install.packages("tm")
+install.packages("dplyr")
+install.packages("ggplot2")
+install.packages("gtExtras")
+install.packages("gt")
+install.packages("ggridges", dependencies = TRUE)
+install.packages("tidytext")
+install.packages("wordcloud")
+install.packages("reshape2")
+install.packages("textmineR")
+install.packages("arules")
+install.packages("arulesViz")
+install.packages("cluster")
+install.packages("slackr")
+```
+
+::: {.output .stream .stderr}
+    Installing package into ‘/usr/local/lib/R/site-library’
+    (as ‘lib’ is unspecified)
+
+    also installing the dependencies ‘MatrixExtra’, ‘float’, ‘RhpcBLASctl’, ‘RcppArmadillo’, ‘Rcpp’, ‘rsparse’, ‘mlapi’, ‘lgr’
+
+
+    Installing package into ‘/usr/local/lib/R/site-library’
+    (as ‘lib’ is unspecified)
+
+    Installing package into ‘/usr/local/lib/R/site-library’
+    (as ‘lib’ is unspecified)
+
+    also installing the dependencies ‘NLP’, ‘slam’, ‘BH’
+
+
+    Installing package into ‘/usr/local/lib/R/site-library’
+    (as ‘lib’ is unspecified)
+
+    Installing package into ‘/usr/local/lib/R/site-library’
+    (as ‘lib’ is unspecified)
+
+    Installing package into ‘/usr/local/lib/R/site-library’
+    (as ‘lib’ is unspecified)
+
+    also installing the dependencies ‘V8’, ‘reactR’, ‘bigD’, ‘bitops’, ‘htmlwidgets’, ‘juicyjuice’, ‘markdown’, ‘reactable’, ‘prismatic’, ‘gt’, ‘paletteer’
+
+
+    Installing package into ‘/usr/local/lib/R/site-library’
+    (as ‘lib’ is unspecified)
+
+    Installing package into ‘/usr/local/lib/R/site-library’
+    (as ‘lib’ is unspecified)
+
+    also installing the dependencies ‘lazyeval’, ‘rex’, ‘covr’, ‘patchwork’, ‘ggplot2movies’, ‘vdiffr’
+
+
+    Installing package into ‘/usr/local/lib/R/site-library’
+    (as ‘lib’ is unspecified)
+
+    also installing the dependencies ‘SnowballC’, ‘janeaustenr’, ‘tokenizers’
+
+
+    Installing package into ‘/usr/local/lib/R/site-library’
+    (as ‘lib’ is unspecified)
+
+    Installing package into ‘/usr/local/lib/R/site-library’
+    (as ‘lib’ is unspecified)
+
+    also installing the dependency ‘plyr’
+
+
+    Installing package into ‘/usr/local/lib/R/site-library’
+    (as ‘lib’ is unspecified)
+
+    also installing the dependencies ‘ISOcodes’, ‘RcppEigen’, ‘gtools’, ‘stopwords’, ‘RcppProgress’, ‘RSpectra’
+
+
+    Installing package into ‘/usr/local/lib/R/site-library’
+    (as ‘lib’ is unspecified)
+
+    Installing package into ‘/usr/local/lib/R/site-library’
+    (as ‘lib’ is unspecified)
+
+    also installing the dependencies ‘iterators’, ‘permute’, ‘zoo’, ‘tweenr’, ‘polyclip’, ‘gridExtra’, ‘later’, ‘ca’, ‘foreach’, ‘gclus’, ‘qap’, ‘registry’, ‘TSP’, ‘vegan’, ‘lmtest’, ‘ggforce’, ‘ggrepel’, ‘viridis’, ‘tidygraph’, ‘graphlayouts’, ‘httpuv’, ‘crosstalk’, ‘promises’, ‘seriation’, ‘vcd’, ‘igraph’, ‘scatterplot3d’, ‘ggraph’, ‘DT’, ‘plotly’, ‘visNetwork’
+
+
+    Installing package into ‘/usr/local/lib/R/site-library’
+    (as ‘lib’ is unspecified)
+
+    Installing package into ‘/usr/local/lib/R/site-library’
+    (as ‘lib’ is unspecified)
+:::
+:::
+
+::: {.cell .code execution_count="3" colab="{\"base_uri\":\"https://localhost:8080/\"}" id="ZBLF0BD6XZj7" outputId="2f44e9f4-f2e0-4eae-82a5-0538e29cc60d"}
+``` python
+library(text2vec)
+library(qdapRegex)
+library(tm)
+library(tidytext)
+library(wordcloud)
+library(dplyr)
+library(readr)
+library(ggplot2)
+library(tidyverse)
+library(lubridate)
+library(ggridges)
+library(Matrix)
+library(dplyr)
+library(slackr)
+library(arules)
+library(arulesViz)
+library(cluster)
+library(textmineR)
+```
+
+::: {.output .stream .stderr}
+    Loading required package: NLP
+
+    Loading required package: RColorBrewer
+
+
+    Attaching package: ‘dplyr’
+
+
+    The following object is masked from ‘package:qdapRegex’:
+
+        explain
+
+
+    The following objects are masked from ‘package:stats’:
+
+        filter, lag
+
+
+    The following objects are masked from ‘package:base’:
+
+        intersect, setdiff, setequal, union
+
+
+
+    Attaching package: ‘ggplot2’
+
+
+    The following object is masked from ‘package:NLP’:
+
+        annotate
+
+
+    The following object is masked from ‘package:qdapRegex’:
+
+        %+%
+
+
+    ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+    ✔ forcats   1.0.0     ✔ stringr   1.5.1
+    ✔ lubridate 1.9.3     ✔ tibble    3.2.1
+    ✔ purrr     1.0.2     ✔ tidyr     1.3.1
+    ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+    ✖ ggplot2::%+%()      masks qdapRegex::%+%()
+    ✖ purrr::%||%()       masks base::%||%()
+    ✖ ggplot2::annotate() masks NLP::annotate()
+    ✖ dplyr::explain()    masks qdapRegex::explain()
+    ✖ dplyr::filter()     masks stats::filter()
+    ✖ dplyr::lag()        masks stats::lag()
+    ℹ Use the conflicted package (<http://conflicted.r-lib.org/>) to force all conflicts to become errors
+
+    Attaching package: ‘Matrix’
+
+
+    The following objects are masked from ‘package:tidyr’:
+
+        expand, pack, unpack
+
+
+
+    Attaching package: ‘arules’
+
+
+    The following object is masked from ‘package:dplyr’:
+
+        recode
+
+
+    The following object is masked from ‘package:tm’:
+
+        inspect
+
+
+    The following objects are masked from ‘package:base’:
+
+        abbreviate, write
+
+
+
+    Attaching package: ‘textmineR’
+
+
+    The following object is masked from ‘package:Matrix’:
+
+        update
+
+
+    The following object is masked from ‘package:stats’:
+
+        update
+:::
+:::
+
+::: {.cell .markdown id="sZJBxYRIsK4k"}
+## **2. Loading the Dataset from Github** {#2-loading-the-dataset-from-github}
+:::
+
+::: {.cell .code execution_count="4" id="qCeJx6UaGf6R"}
+``` python
+load_data <- function(url, source_name) {
+  data <- read_delim(url, delim = "|", col_names = c("ID", "Date", "Content"), locale = locale(encoding = "latin1"))
+  data$Source <- source_name
+  data <- data[, c("ID", "Source", "Date", "Content")]
+  return(data)
+}
+```
+:::
+
+::: {.cell .code execution_count="5" colab="{\"base_uri\":\"https://localhost:8080/\"}" id="rn_TK52iz-uw" outputId="41b06fef-30a5-41a4-f457-ac2821096224"}
+``` python
+kaiser_health   <- load_data("https://raw.githubusercontent.com/amir-karami/Health-News-Tweets-Data/master/KaiserHealthNews.txt", "Kaiser Health News")
+```
+
+::: {.output .stream .stderr}
+    Rows: 3509 Columns: 3
+    ── Column specification ────────────────────────────────────────────────────────
+    Delimiter: "|"
+    chr (2): Date, Content
+    dbl (1): ID
+
+    ℹ Use `spec()` to retrieve the full column specification for this data.
+    ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+:::
+:::
+
+::: {.cell .code execution_count="6" colab="{\"base_uri\":\"https://localhost:8080/\",\"height\":390}" id="ksUMjEKG0Wfc" outputId="df62acc2-8389-4372-a6bb-37151cae1f53"}
+``` python
+head(kaiser_health)
+```
+
+::: {.output .display_data}
+
+A tibble: 6 × 4
+
+| ID &lt;dbl&gt; | Source &lt;chr&gt; | Date &lt;chr&gt; | Content &lt;chr&gt; |
+|---|---|---|---|
+| 5.862667e+17 | Kaiser Health News | Thu Apr 09 20:37:18 +0000 2015 | Tougher Vaccine Law In Calif. Clears First Hurdle http://khne.ws/1GQdDro http://pbs.twimg.com/media/CCLWazbUEAAmvjH.jpg                                              |
+| 5.862602e+17 | Kaiser Health News | Thu Apr 09 20:11:29 +0000 2015 | A new sort of extracurricular activity: seeing patients. http://khne.ws/1ceRuaZ http://pbs.twimg.com/media/CCLQgiFUIAAC7nJ.jpg                                       |
+| 5.862388e+17 | Kaiser Health News | Thu Apr 09 18:46:24 +0000 2015 | Houston firefighters have another tool at their disposal when answering calls: digital doctors http://khne.ws/1NfQjsp http://pbs.twimg.com/media/CCK9CYoUsAE4PP8.jpg |
+| 5.861819e+17 | Kaiser Health News | Thu Apr 09 15:00:25 +0000 2015 | Will #Montana expand its #Medicaid program? Some moderates there have revived the idea: http://khne.ws/1Do7UrB http://pbs.twimg.com/media/CCKJT7DUAAABcJj.jpg        |
+| 5.861593e+17 | Kaiser Health News | Thu Apr 09 13:30:44 +0000 2015 | Rand Paul's campaign first day: abortion and the budget: http://khne.ws/1y8aJwC                                                                                      |
+| 5.861591e+17 | Kaiser Health News | Thu Apr 09 13:29:47 +0000 2015 | Enroll America, A Group Dedicated To Promoting Health Law Sign Ups, To Cut 100 Jobs http://khne.ws/1HUROpc                                                           |
+:::
+:::
+
+::: {.cell .code execution_count="7" colab="{\"base_uri\":\"https://localhost:8080/\"}" id="pdIf8YwE5_1X" outputId="80bfd5cd-0a54-42cf-af87-83e8624a0d46"}
+``` python
+nbc_health      <- load_data("https://raw.githubusercontent.com/amir-karami/Health-News-Tweets-Data/master/NBChealth.txt", "NBC Health")
+bbc_health      <- load_data("https://raw.githubusercontent.com/amir-karami/Health-News-Tweets-Data/master/bbchealth.txt", "BBC Health")
+cbc_health      <- load_data("https://raw.githubusercontent.com/amir-karami/Health-News-Tweets-Data/master/cbchealth.txt", "CBC Health")
+cnn_health      <- load_data("https://raw.githubusercontent.com/amir-karami/Health-News-Tweets-Data/master/cnnhealth.txt", "CNN Health")
+everyday_health <- load_data("https://raw.githubusercontent.com/amir-karami/Health-News-Tweets-Data/master/everydayhealth.txt", "Everyday Health")
+fox_news_health <- load_data("https://raw.githubusercontent.com/amir-karami/Health-News-Tweets-Data/master/foxnewshealth.txt", "Fox News Health")
+gdn_health      <- load_data("https://raw.githubusercontent.com/amir-karami/Health-News-Tweets-Data/master/gdnhealthcare.txt", "GDN Health")
+good_health     <- load_data("https://raw.githubusercontent.com/amir-karami/Health-News-Tweets-Data/master/latimeshealth.txt", "Good Health")
+latimeshealth   <- load_data("https://raw.githubusercontent.com/amir-karami/Health-News-Tweets-Data/master/latimeshealth.txt", "LA Times Health")
+msnhealthnews   <- load_data("https://raw.githubusercontent.com/amir-karami/Health-News-Tweets-Data/master/msnhealthnews.txt", "MSN Health News")
+nprhealth       <- load_data("https://raw.githubusercontent.com/amir-karami/Health-News-Tweets-Data/master/nprhealth.txt", "NPR Health")
+nytimeshealth   <- load_data("https://raw.githubusercontent.com/amir-karami/Health-News-Tweets-Data/master/nytimeshealth.txt", "NY Times Health")
+reuters_health  <- load_data("https://raw.githubusercontent.com/amir-karami/Health-News-Tweets-Data/master/reuters_health.txt", "Reuters Health")
+usnewshealth    <- load_data("https://raw.githubusercontent.com/amir-karami/Health-News-Tweets-Data/master/usnewshealth.txt", "US News Health")
+wsjhealth       <- load_data("https://raw.githubusercontent.com/amir-karami/Health-News-Tweets-Data/master/wsjhealth.txt", "WSJ Health")
+```
+
+::: {.output .stream .stderr}
+    Rows: 4215 Columns: 3
+    ── Column specification ────────────────────────────────────────────────────────
+    Delimiter: "|"
+    chr (2): Date, Content
+    dbl (1): ID
+
+    ℹ Use `spec()` to retrieve the full column specification for this data.
+    ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+    Rows: 3929 Columns: 3
+    ── Column specification ────────────────────────────────────────────────────────
+    Delimiter: "|"
+    chr (2): Date, Content
+    dbl (1): ID
+
+    ℹ Use `spec()` to retrieve the full column specification for this data.
+    ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+    Rows: 3741 Columns: 3
+    ── Column specification ────────────────────────────────────────────────────────
+    Delimiter: "|"
+    chr (2): Date, Content
+    dbl (1): ID
+
+    ℹ Use `spec()` to retrieve the full column specification for this data.
+    ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+    Rows: 3808 Columns: 3
+    ── Column specification ────────────────────────────────────────────────────────
+    Delimiter: "|"
+    chr (2): Date, Content
+    dbl (1): ID
+
+    ℹ Use `spec()` to retrieve the full column specification for this data.
+    ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+    Rows: 3239 Columns: 3
+    ── Column specification ────────────────────────────────────────────────────────
+    Delimiter: "|"
+    chr (2): Date, Content
+    dbl (1): ID
+
+    ℹ Use `spec()` to retrieve the full column specification for this data.
+    ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+    Rows: 2000 Columns: 3
+    ── Column specification ────────────────────────────────────────────────────────
+    Delimiter: "|"
+    chr (2): Date, Content
+    dbl (1): ID
+
+    ℹ Use `spec()` to retrieve the full column specification for this data.
+    ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+    Rows: 2990 Columns: 3
+    ── Column specification ────────────────────────────────────────────────────────
+    Delimiter: "|"
+    chr (2): Date, Content
+    dbl (1): ID
+
+    ℹ Use `spec()` to retrieve the full column specification for this data.
+    ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+    Rows: 4171 Columns: 3
+    ── Column specification ────────────────────────────────────────────────────────
+    Delimiter: "|"
+    chr (2): Date, Content
+    dbl (1): ID
+
+    ℹ Use `spec()` to retrieve the full column specification for this data.
+    ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+    Rows: 4171 Columns: 3
+    ── Column specification ────────────────────────────────────────────────────────
+    Delimiter: "|"
+    chr (2): Date, Content
+    dbl (1): ID
+
+    ℹ Use `spec()` to retrieve the full column specification for this data.
+    ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+    Rows: 3199 Columns: 3
+    ── Column specification ────────────────────────────────────────────────────────
+    Delimiter: "|"
+    chr (2): Date, Content
+    dbl (1): ID
+
+    ℹ Use `spec()` to retrieve the full column specification for this data.
+    ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+    Rows: 4837 Columns: 3
+    ── Column specification ────────────────────────────────────────────────────────
+    Delimiter: "|"
+    chr (2): Date, Content
+    dbl (1): ID
+
+    ℹ Use `spec()` to retrieve the full column specification for this data.
+    ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+    Rows: 5894 Columns: 3
+    ── Column specification ────────────────────────────────────────────────────────
+    Delimiter: "|"
+    chr (2): Date, Content
+    dbl (1): ID
+
+    ℹ Use `spec()` to retrieve the full column specification for this data.
+    ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+    Rows: 4719 Columns: 3
+    ── Column specification ────────────────────────────────────────────────────────
+    Delimiter: "|"
+    chr (2): Date, Content
+    dbl (1): ID
+
+    ℹ Use `spec()` to retrieve the full column specification for this data.
+    ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+    Rows: 621 Columns: 3
+    ── Column specification ────────────────────────────────────────────────────────
+    Delimiter: "|"
+    chr (2): Date, Content
+    dbl (1): ID
+
+    ℹ Use `spec()` to retrieve the full column specification for this data.
+    ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+    Rows: 3200 Columns: 3
+    ── Column specification ────────────────────────────────────────────────────────
+    Delimiter: "|"
+    chr (2): Date, Content
+    dbl (1): ID
+
+    ℹ Use `spec()` to retrieve the full column specification for this data.
+    ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+:::
+:::
+
+::: {.cell .markdown id="-o_RTBD7AhoQ"}
+# **II. Data Preparation** {#ii-data-preparation}
+:::
+
+::: {.cell .markdown id="Vd_NniYF2UJx"}
+## **1. Exploratory Data Analysis** {#1-exploratory-data-analysis}
+:::
+
+::: {.cell .code execution_count="8" id="wwCSjW8K6QjA"}
+``` python
+combined_data <- bind_rows(kaiser_health,
+                            nbc_health,
+                            bbc_health,
+                            cbc_health,
+                            cnn_health,
+                            everyday_health,
+                            fox_news_health,
+                            gdn_health,
+                            good_health,
+                            latimeshealth,
+                            msnhealthnews,
+                            nprhealth,
+                            nytimeshealth,
+                            reuters_health,
+                            usnewshealth,
+                            wsjhealth)
+```
+:::
+
+::: {.cell .code execution_count="9" colab="{\"base_uri\":\"https://localhost:8080/\",\"height\":390}" id="NszeBSUY2vXD" outputId="c928689a-2d9a-472c-b66b-505f7a69c707"}
+``` python
+head(combined_data)
+```
+
+::: {.output .display_data}
+
+A tibble: 6 × 4
+
+| ID &lt;dbl&gt; | Source &lt;chr&gt; | Date &lt;chr&gt; | Content &lt;chr&gt; |
+|---|---|---|---|
+| 5.862667e+17 | Kaiser Health News | Thu Apr 09 20:37:18 +0000 2015 | Tougher Vaccine Law In Calif. Clears First Hurdle http://khne.ws/1GQdDro http://pbs.twimg.com/media/CCLWazbUEAAmvjH.jpg                                              |
+| 5.862602e+17 | Kaiser Health News | Thu Apr 09 20:11:29 +0000 2015 | A new sort of extracurricular activity: seeing patients. http://khne.ws/1ceRuaZ http://pbs.twimg.com/media/CCLQgiFUIAAC7nJ.jpg                                       |
+| 5.862388e+17 | Kaiser Health News | Thu Apr 09 18:46:24 +0000 2015 | Houston firefighters have another tool at their disposal when answering calls: digital doctors http://khne.ws/1NfQjsp http://pbs.twimg.com/media/CCK9CYoUsAE4PP8.jpg |
+| 5.861819e+17 | Kaiser Health News | Thu Apr 09 15:00:25 +0000 2015 | Will #Montana expand its #Medicaid program? Some moderates there have revived the idea: http://khne.ws/1Do7UrB http://pbs.twimg.com/media/CCKJT7DUAAABcJj.jpg        |
+| 5.861593e+17 | Kaiser Health News | Thu Apr 09 13:30:44 +0000 2015 | Rand Paul's campaign first day: abortion and the budget: http://khne.ws/1y8aJwC                                                                                      |
+| 5.861591e+17 | Kaiser Health News | Thu Apr 09 13:29:47 +0000 2015 | Enroll America, A Group Dedicated To Promoting Health Law Sign Ups, To Cut 100 Jobs http://khne.ws/1HUROpc                                                           |
+:::
+:::
+
+::: {.cell .code execution_count="10" colab="{\"base_uri\":\"https://localhost:8080/\"}" id="L9xFHILyxWYz" outputId="c51c5d16-8770-453e-89b7-d801011b6444"}
+``` python
+str(combined_data)
+```
+
+::: {.output .stream .stdout}
+    tibble [58,243 × 4] (S3: tbl_df/tbl/data.frame)
+     $ ID     : num [1:58243] 5.86e+17 5.86e+17 5.86e+17 5.86e+17 5.86e+17 ...
+     $ Source : chr [1:58243] "Kaiser Health News" "Kaiser Health News" "Kaiser Health News" "Kaiser Health News" ...
+     $ Date   : chr [1:58243] "Thu Apr 09 20:37:18 +0000 2015" "Thu Apr 09 20:11:29 +0000 2015" "Thu Apr 09 18:46:24 +0000 2015" "Thu Apr 09 15:00:25 +0000 2015" ...
+     $ Content: chr [1:58243] "Tougher Vaccine Law In Calif. Clears First Hurdle http://khne.ws/1GQdDro http://pbs.twimg.com/media/CCLWazbUEAAmvjH.jpg" "A new sort of extracurricular activity: seeing patients. http://khne.ws/1ceRuaZ http://pbs.twimg.com/media/CCLQgiFUIAAC7nJ.jpg" "Houston firefighters have another tool at their disposal when answering calls: digital doctors http://khne.ws/1"| __truncated__ "Will #Montana expand its #Medicaid program? Some moderates there have revived the idea: http://khne.ws/1Do7UrB "| __truncated__ ...
+:::
+:::
+
+::: {.cell .code execution_count="11" colab="{\"base_uri\":\"https://localhost:8080/\",\"height\":138}" id="sBP8LxnU24eW" outputId="008972e8-f74f-4004-bfe4-02166555bd1d"}
+``` python
+summary(combined_data)
+```
+
+::: {.output .display_data}
+           ID               Source              Date             Content         
+     Min.   :1.061e+17   Length:58243       Length:58243       Length:58243      
+     1st Qu.:3.331e+17   Class :character   Class :character   Class :character  
+     Median :4.459e+17   Mode  :character   Mode  :character   Mode  :character  
+     Mean   :4.214e+17                                                           
+     3rd Qu.:5.242e+17                                                           
+     Max.   :5.863e+17                                                           
+:::
+:::
+
+::: {.cell .code execution_count="12" colab="{\"base_uri\":\"https://localhost:8080/\"}" id="88o_OmdSKv1l" outputId="cde60668-4a56-4a93-8636-5e599f9abaf0"}
+``` python
+tweets_per_source <- combined_data %>%
+  count(Source)
+
+print(tweets_per_source)
+```
+
+::: {.output .stream .stdout}
+    # A tibble: 16 × 2
+       Source                 n
+       <chr>              <int>
+     1 BBC Health          3929
+     2 CBC Health          3741
+     3 CNN Health          3808
+     4 Everyday Health     3239
+     5 Fox News Health     2000
+     6 GDN Health          2990
+     7 Good Health         4171
+     8 Kaiser Health News  3509
+     9 LA Times Health     4171
+    10 MSN Health News     3199
+    11 NBC Health          4215
+    12 NPR Health          4837
+    13 NY Times Health     5894
+    14 Reuters Health      4719
+    15 US News Health       621
+    16 WSJ Health          3200
+:::
+:::
+
+::: {.cell .code execution_count="13" colab="{\"base_uri\":\"https://localhost:8080/\",\"height\":437}" id="E5ne6mev8e2R" outputId="b451b7e2-4b59-4ec5-ecb0-25dacdeb6295"}
+``` python
+plt <- ggplot(tweets_per_source, aes(x = reorder(Source, n), y = n, fill = n)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.9)) +
+  geom_text(aes(label = n), vjust = -0.5, size = 3, position = position_dodge(width = 0.9)) +
+  scale_fill_gradient(low = "lightblue", high = "darkblue", name = "Number of Tweets") +
+  labs(x = "Source", y = "Number of Tweets", title = "Number of Tweets per Source") +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    panel.grid.major.y = element_line(color = "lightgrey"),
+    legend.position = "right"
+  ) +
+  scale_y_continuous(breaks = seq(0, max(tweets_per_source$n), by = 1000))
+
+ggsave("tweets_per_source_plot.png", plt, width = 12, height = 8, units = "in")
+
+print(plt)
+```
+
+::: {.output .display_data}
+![](vertopal_589ed2136c744435951e82f2ed516c8a/94b0050e73db48781c98d4989b5428ce62bb1329.png){height="420"
+width="420"}
+:::
+:::
+
+::: {.cell .code execution_count="14" colab="{\"base_uri\":\"https://localhost:8080/\"}" id="JmakyRic71So" outputId="e0067cf3-c183-42b2-a31b-1f67bdbeefa7"}
+``` python
+combined_data$Date <- as.POSIXct(combined_data$Date, format = "%a %b %d %H:%M:%S %z %Y")
+
+combined_data$Year <- lubridate::year(combined_data$Date)
+
+tweets_per_source_per_year <- combined_data %>%
+  group_by(Year, Source) %>%
+  summarise(Count = n()) %>%
+  ungroup() %>%
+  arrange(Year, desc(Count))
+
+print(tweets_per_source_per_year)
+```
+
+::: {.output .stream .stderr}
+    `summarise()` has grouped output by 'Year'. You can override using the
+    `.groups` argument.
+:::
+
+::: {.output .stream .stdout}
+    # A tibble: 44 × 3
+        Year Source             Count
+       <dbl> <chr>              <int>
+     1  2011 MSN Health News     1307
+     2  2011 Good Health          104
+     3  2011 LA Times Health      104
+     4  2012 MSN Health News     1892
+     5  2012 Good Health         1203
+     6  2012 LA Times Health     1203
+     7  2012 CNN Health           650
+     8  2012 NPR Health           473
+     9  2012 Kaiser Health News   264
+    10  2013 Everyday Health     3239
+    # ℹ 34 more rows
+:::
+:::
+
+::: {.cell .code execution_count="15" colab="{\"base_uri\":\"https://localhost:8080/\",\"height\":138}" id="UsXqOvoqAjNo" outputId="a1468725-849b-41fd-8a8c-49cebfaf2ab0"}
+``` python
+summary(tweets_per_source_per_year)
+```
+
+::: {.output .display_data}
+          Year         Source              Count       
+     Min.   :2011   Length:44          Min.   :  13.0  
+     1st Qu.:2013   Class :character   1st Qu.: 495.5  
+     Median :2014   Mode  :character   Median :1212.5  
+     Mean   :2014                      Mean   :1323.7  
+     3rd Qu.:2014                      3rd Qu.:1908.5  
+     Max.   :2015                      Max.   :3776.0  
+:::
+:::
+
+::: {.cell .code execution_count="16" id="nI6tEH_wBKck"}
+``` python
+sources_per_year <- tweets_per_source_per_year %>%
+  group_by(Year) %>%
+  summarise(Num_Sources = n_distinct(Source))
+```
+:::
+
+::: {.cell .code execution_count="17" colab="{\"base_uri\":\"https://localhost:8080/\"}" id="yASPRs3ABPGI" outputId="682d94db-1894-4529-b4b5-1aef90717845"}
+``` python
+print(sources_per_year)
+```
+
+::: {.output .stream .stdout}
+    # A tibble: 5 × 2
+       Year Num_Sources
+      <dbl>       <int>
+    1  2011           3
+    2  2012           6
+    3  2013          11
+    4  2014          14
+    5  2015          10
+:::
+:::
+
+::: {.cell .code execution_count="18" colab="{\"base_uri\":\"https://localhost:8080/\",\"height\":138}" id="0Dgz5mtSBUFG" outputId="6bdd328a-09ee-44d1-a584-03d2e3b1933d"}
+``` python
+summary(sources_per_year)
+```
+
+::: {.output .display_data}
+          Year       Num_Sources  
+     Min.   :2011   Min.   : 3.0  
+     1st Qu.:2012   1st Qu.: 6.0  
+     Median :2013   Median :10.0  
+     Mean   :2013   Mean   : 8.8  
+     3rd Qu.:2014   3rd Qu.:11.0  
+     Max.   :2015   Max.   :14.0  
+:::
+:::
+
+::: {.cell .code execution_count="19" colab="{\"base_uri\":\"https://localhost:8080/\",\"height\":437}" id="KPfKpHTXLLHl" outputId="17a8355c-2a5d-45f5-fe72-fde0e8ce18b4"}
+``` python
+ggplot(tweets_per_source_per_year, aes(x = Year, y = Count, fill = Source, group = reorder(interaction(Source, Year), Count))) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Number of Tweets per Source for Each Year",
+       x = "Year",
+       y = "Number of Tweets",
+       fill = "Source") +
+  theme_minimal() +
+  theme(legend.position = "right",
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.title = element_text(size = 12),
+        legend.text = element_text(size = 10))
+```
+
+::: {.output .display_data}
+![](vertopal_589ed2136c744435951e82f2ed516c8a/fd8e42f23ec49864a7a6edd50486f17747befbb4.png){height="420"
+width="420"}
+:::
+:::
+
+::: {.cell .code execution_count="20" colab="{\"base_uri\":\"https://localhost:8080/\"}" id="GphcpFLFUE9h" outputId="a0bd9c1d-0391-49a2-a842-e5cfa5d774b7"}
+``` python
+tweets_per_year <- combined_data %>%
+  group_by(Year) %>%
+  summarise(
+    Sources = list(unique(Source)),
+    Source_Count = n_distinct(Source),
+    Tweet_Count = n()
+  )
+
+print(tweets_per_year)
+
+tweets_per_year <- tweets_per_year %>% mutate(Sources = sapply(Sources, toString))
+
+print(tweets_per_year)
+```
+
+::: {.output .stream .stdout}
+    # A tibble: 5 × 4
+       Year Sources    Source_Count Tweet_Count
+      <dbl> <list>            <int>       <int>
+    1  2011 <chr [3]>             3        1515
+    2  2012 <chr [6]>             6        5685
+    3  2013 <chr [11]>           11       17934
+    4  2014 <chr [14]>           14       25577
+    5  2015 <chr [10]>           10        7532
+    # A tibble: 5 × 4
+       Year Sources                                         Source_Count Tweet_Count
+      <dbl> <chr>                                                  <int>       <int>
+    1  2011 Good Health, LA Times Health, MSN Health News              3        1515
+    2  2012 Kaiser Health News, CNN Health, Good Health, L…            6        5685
+    3  2013 Kaiser Health News, NBC Health, BBC Health, CB…           11       17934
+    4  2014 Kaiser Health News, NBC Health, BBC Health, CB…           14       25577
+    5  2015 Kaiser Health News, BBC Health, CBC Health, CN…           10        7532
+:::
+:::
+
+::: {.cell .code execution_count="21" colab="{\"base_uri\":\"https://localhost:8080/\",\"height\":437}" id="QzIBA9kpmidt" outputId="2fa2d558-89eb-4d6d-feac-d5b67632f002"}
+``` python
+tweets_per_year <- tweets_per_year %>%
+  mutate(Percentage = Tweet_Count / sum(Tweet_Count) * 100)
+
+pie_chart <- ggplot(tweets_per_year, aes(x = "", y = Percentage, fill = as.factor(Year))) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar("y", start = 0) +
+  labs(title = "Tweet Counts per Year", fill = "Year",
+       caption = "Percentage of Tweets") +
+  theme_void() +
+  scale_fill_manual(values = c("2014" = "red",  "2013" = "#377eb8", "2012" = "#5c92cc",
+                               "2015" = "#7fa6e0", "2011" = "#a3baee"))+
+  geom_text(aes(label = paste(round(Percentage, 1), "%")), position = position_stack(vjust = 0.5))
+
+print(pie_chart)
+```
+
+::: {.output .display_data}
+![](vertopal_589ed2136c744435951e82f2ed516c8a/732f09c1054229d645445ae718c1cf847d268368.png){height="420"
+width="420"}
+:::
+:::
+
+::: {.cell .code execution_count="22" colab="{\"base_uri\":\"https://localhost:8080/\",\"height\":437}" id="Ws5I2dz9AVLq" outputId="d5d58378-ed0c-4113-9f56-caa245d339a6"}
+``` python
+library(ggplot2)
+library(dplyr)
+
+tweets_per_year <- tweets_per_year %>%
+  mutate(is_max = ifelse(Source_Count == max(Source_Count), "Max", "Not Max"))
+
+ggplot(tweets_per_year, aes(x = as.factor(Year), y = Source_Count, fill = is_max, label = Source_Count))+
+  geom_bar(stat = "identity") +
+  geom_text(size = 4, position = position_stack(vjust = 1.04)) +
+  scale_fill_manual(values = c("Max" = "red", "Not Max" = "dodgerblue")) +
+  labs(title = "Number of Sources per Year",
+       x = "Year",
+       y = "Number of Sources") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5),
+        axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+::: {.output .display_data}
+![](vertopal_589ed2136c744435951e82f2ed516c8a/e4ed7da82a896753d553bd381ad91ada6dc8212c.png){height="420"
+width="420"}
+:::
+:::
+
+::: {.cell .code execution_count="23" colab="{\"base_uri\":\"https://localhost:8080/\"}" id="owFunFJjULHt" outputId="b79c3625-1cef-484c-baab-01ef1605160b"}
+``` python
+data_2014 <- combined_data %>% filter(Year == 2014)
+
+tweets_per_source_2014 <- data_2014 %>%
+  group_by(Source) %>%
+  summarise(Tweet_Count = n())
+
+print(tweets_per_source_2014)
+```
+
+::: {.output .stream .stdout}
+    # A tibble: 14 × 2
+       Source             Tweet_Count
+       <chr>                    <int>
+     1 BBC Health                2537
+     2 CBC Health                2137
+     3 CNN Health                1151
+     4 Fox News Health            468
+     5 GDN Health                1222
+     6 Good Health               1062
+     7 Kaiser Health News        1248
+     8 LA Times Health           1062
+     9 NBC Health                2071
+    10 NPR Health                2406
+    11 NY Times Health           3776
+    12 Reuters Health            3259
+    13 US News Health              13
+    14 WSJ Health                3165
+:::
+:::
+
+::: {.cell .code execution_count="24" colab="{\"base_uri\":\"https://localhost:8080/\"}" id="O4248K7dUjD_" outputId="342b5280-3329-44db-9d53-9f32327b182f"}
+``` python
+data_2014 <- data_2014 %>%
+  filter(!Source %in% c("Fox News Health", "US News Health"))
+
+write.csv(data_2014, "data_2014.csv", row.names = FALSE)
+
+print(data_2014)
+```
+
+::: {.output .stream .stdout}
+    # A tibble: 25,096 × 5
+            ID Source             Date                Content                   Year
+         <dbl> <chr>              <dttm>              <chr>                    <dbl>
+     1 5.50e17 Kaiser Health News 2014-12-30 15:35:22 "RT @cspanwj: VIDEO: @j…  2014
+     2 5.50e17 Kaiser Health News 2014-12-29 17:09:33 "How A State\u0092s Cho…  2014
+     3 5.48e17 Kaiser Health News 2014-12-24 14:52:02 "Some doctors who treat…  2014
+     4 5.48e17 Kaiser Health News 2014-12-24 14:49:27 "Ebola Doctor Makes Tou…  2014
+     5 5.48e17 Kaiser Health News 2014-12-24 14:48:55 "DETAILS: FDA Proposes …  2014
+     6 5.47e17 Kaiser Health News 2014-12-23 20:20:43 "Millions Have Already …  2014
+     7 5.47e17 Kaiser Health News 2014-12-23 18:47:31 "Readers Ask: Can I Kee…  2014
+     8 5.47e17 Kaiser Health News 2014-12-23 18:38:09 "Some #Medicaid docs ar…  2014
+     9 5.47e17 Kaiser Health News 2014-12-22 22:27:35 "Is Your Heart Doctor I…  2014
+    10 5.46e17 Kaiser Health News 2014-12-19 21:02:58 ".@mandrews110 answers …  2014
+    # ℹ 25,086 more rows
+:::
+:::
+
+::: {.cell .code execution_count="25" colab="{\"base_uri\":\"https://localhost:8080/\",\"height\":260}" id="OpUPwD7JT73_" outputId="f39b86bb-fa6d-4646-e711-afc2643ae939"}
+``` python
+summary(data_2014)
+```
+
+::: {.output .display_data}
+           ID               Source               Date                       
+     Min.   :4.182e+17   Length:25096       Min.   :2014-01-01 00:17:27.00  
+     1st Qu.:4.608e+17   Class :character   1st Qu.:2014-04-28 17:49:26.50  
+     Median :4.992e+17   Mode  :character   Median :2014-08-12 16:11:14.00  
+     Mean   :4.925e+17                      Mean   :2014-07-25 04:44:57.82  
+     3rd Qu.:5.249e+17                      3rd Qu.:2014-10-22 12:21:50.25  
+     Max.   :5.504e+17                      Max.   :2014-12-31 22:16:26.00  
+       Content               Year     
+     Length:25096       Min.   :2014  
+     Class :character   1st Qu.:2014  
+     Mode  :character   Median :2014  
+                        Mean   :2014  
+                        3rd Qu.:2014  
+                        Max.   :2014  
+:::
+:::
+
+::: {.cell .code execution_count="26" colab="{\"base_uri\":\"https://localhost:8080/\"}" id="EmHjRmmGVLl0" outputId="5ed8faaf-1a7b-4c5f-8ab5-c57722059e14"}
+``` python
+unique_sources_2014 = unique(data_2014$Source)
+
+print(unique_sources_2014)
+```
+
+::: {.output .stream .stdout}
+     [1] "Kaiser Health News" "NBC Health"         "BBC Health"        
+     [4] "CBC Health"         "CNN Health"         "GDN Health"        
+     [7] "Good Health"        "LA Times Health"    "NPR Health"        
+    [10] "NY Times Health"    "Reuters Health"     "WSJ Health"        
+:::
+:::
+
+::: {.cell .code execution_count="27" colab="{\"base_uri\":\"https://localhost:8080/\",\"height\":437}" id="EWC1lMfpauPD" outputId="7b313831-1073-4ffa-8819-0c67f7d77c47"}
+``` python
+source_tweet_counts <- data_2014 %>%
+  group_by(Source) %>%
+  summarise(Tweet_Count = n(), .groups = 'drop') %>%
+  arrange(desc(Tweet_Count))
+
+plot <- ggplot(source_tweet_counts, aes(x = reorder(Source, -Tweet_Count), y = Tweet_Count)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  geom_text(aes(label = Tweet_Count), vjust = -0.3, color = "black", size = 3.5) +
+  labs(title = "Number of Tweets per Source in 2014", x = "Source", y = "Number of Tweets") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+print(plot)
+```
+
+::: {.output .display_data}
+![](vertopal_589ed2136c744435951e82f2ed516c8a/16d1987f86983e31a88536a607fed1d90a3c938c.png){height="420"
+width="420"}
+:::
+:::
+
+::: {.cell .code execution_count="28" colab="{\"base_uri\":\"https://localhost:8080/\",\"height\":437}" id="ykJXIYZUZYHw" outputId="191c4026-319f-459d-e0c0-66bea451522d"}
+``` python
+data_2014$Date <- as.Date(data_2014$Date)
+data_2014$Date_numeric <- as.numeric(data_2014$Date - min(data_2014$Date, na.rm = TRUE))
+
+dens <- density(data_2014$Date_numeric)
+max_density_date_numeric <- dens$x[which.max(dens$y)]
+max_density_value <- max(dens$y)
+max_density_date <- min(data_2014$Date, na.rm = TRUE) + max_density_date_numeric
+
+plot <- ggplot(data_2014, aes(x = Date)) +
+  geom_density(aes(y = after_stat(scaled)), fill = "dodgerblue", alpha = 0.7) +
+  geom_vline(xintercept = max_density_date, color = "red", linetype = "dashed", size = 1.5) +
+  labs(title = "Density of Tweets Over Time in 2014", x = "Date", y = "Scaled Density") +
+  theme_minimal() +
+  annotate("text", x = max_density_date, y = 1.05 * max_density_value,
+           label = format(max_density_date, "%B %d, %Y"),
+           vjust = -40, hjust = 1.1, color = "red", fontface = "bold", size = 5, angle = 0)
+
+print(plot)
+```
+
+::: {.output .display_data}
+![](vertopal_589ed2136c744435951e82f2ed516c8a/6469769673debcaf03c96748f3b2188af68ba39e.png){height="420"
+width="420"}
+:::
+:::
+
+::: {.cell .code execution_count="29" colab="{\"base_uri\":\"https://localhost:8080/\",\"height\":437}" id="T6Ope_XRZwkH" outputId="f56038ee-adf6-4f0f-8783-20799331693e"}
+``` python
+data_2014$Date_numeric <- as.numeric(data_2014$Date - min(data_2014$Date, na.rm = TRUE))
+
+plot <- ggplot(data_2014, aes(x = Date_numeric)) +
+  geom_density(aes(fill = Source), alpha = 0.75) +
+  facet_wrap(~ Source, scales = "free") +
+  labs(title = "Density of Tweets per Source in 2014", x = "Days from Start of Year", y = "Density") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+print(plot)
+```
+
+::: {.output .display_data}
+![](vertopal_589ed2136c744435951e82f2ed516c8a/30503313f4c6b6d94b138e12f62fe1fc79373e0f.png){height="420"
+width="420"}
+:::
+:::
+
+::: {.cell .code execution_count="30" colab="{\"base_uri\":\"https://localhost:8080/\",\"height\":472}" id="IyClIYUTcWCy" outputId="9362a92b-f6c3-42b4-dbbe-c4fa187ed126"}
+``` python
+ggplot(data_2014, aes(x = Date_numeric, y = Source, fill = Source)) +
+  geom_density_ridges(scale = 3) +
+  labs(title = "Density of Tweets per Source in 2014",
+       x = "Days from Start of Year",
+       y = "Source") +
+  theme_ridges() +
+  theme(legend.position = "none")
+```
+
+::: {.output .stream .stderr}
+    Picking joint bandwidth of 18.3
+:::
+
+::: {.output .display_data}
+![](vertopal_589ed2136c744435951e82f2ed516c8a/abdc646e0ceef91b3f37a36ac9ba87e9e87e7a3f.png){height="420"
+width="420"}
+:::
+:::
+
+::: {.cell .markdown id="GZmIiqvWtRY2"}
+## **2. Preprocessing** {#2-preprocessing}
+:::
+
+::: {.cell .code execution_count="31" id="O6y2Bz6uE5rF"}
+``` python
+clean_text <- function(text) {
+  text <- gsub("s", "", text)
+  text <- gsub("\\bRT\\b", "", text)
+  text <- gsub("@\\w+", "", text)
+  text <- gsub("https?://\\S+\\s?", "", text)
+  text <- rm_twitter_url(text)
+  text <- gsub("[^A-Za-z]", " ", text)
+  text <- tolower(text)
+  text <- removeWords(text, stopwords("english"))
+  text <- gsub("\\b\\w{1}\\b", "", text)
+  text <- stripWhitespace(text)
+  return(text)
+}
+
+data_2014 <- data_2014 %>%
+  mutate(processed_content = clean_text(Content))
+```
+:::
+
+::: {.cell .code execution_count="32" id="HIqXdm-zLwWb"}
+``` python
+preprocessed <- data_2014 %>% select(Content, processed_content)
+```
+:::
+
+::: {.cell .code execution_count="33" id="4X7I1WQZVTxF"}
+``` python
+write.csv(data_2014, "data_2014.csv", row.names = FALSE, sep = ",", quote = TRUE)
+```
+:::
+
+::: {.cell .code execution_count="34" colab="{\"base_uri\":\"https://localhost:8080/\",\"height\":390}" id="_6msuptjIa1b" outputId="694c86a7-e241-4176-b65d-d1c09d1331f7"}
+``` python
+head(preprocessed)
+```
+
+::: {.output .display_data}
+
+A tibble: 6 × 2
+
+| Content &lt;chr&gt; | processed_content &lt;chr&gt; |
+|---|---|
+| RT @cspanwj: VIDEO: @jrovner, @KHNews Senior Correspondent, on #Medicare and the #ACA http://cs.pn/1B1PCuh http://pbs.twimg.com/media/B6HQ67nCAAAp57I.jpg |  video senior correspondent medicare aca                                     |
+| How A States Choice On Medicaid Expansion Affects Hospitals, @SarahVarney4 reports in @NewsHour: http://khne.ws/1A57NOj                             |  state choice medicaid expansion affects hospitals reports                   |
+| Some doctors who treat #Medicaid patients are going to get a big pay cut. How will it affect patients? http://khne.ws/1wD8dvD                             |  doctors treat medicaid patients going get big pay cut will affect patients  |
+| Ebola Doctor Makes Tough Choice To Save The Lives Of Two Colleagues http://khne.ws/1zhSfnF                                                                | ebola doctor makes tough choice save lives two colleagues                    |
+| DETAILS: FDA Proposes Easing Lifetime Ban On Blood Donations By Gay Men http://khne.ws/1GXjlGL                                                            | details fda proposes easing lifetime ban blood donations gay men             |
+| Millions Have Already Enrolled In 2015 Health Policies, Deadline Still 7 Weeks Off, @jrovner reports: http://khne.ws/1AXR3Is                              | millions already enrolled health policies deadline still weeks reports       |
+:::
+:::
+
+::: {.cell .code execution_count="35" colab="{\"base_uri\":\"https://localhost:8080/\",\"height\":286}" id="UCYTgFcJMBxS" outputId="3cc281ad-2cef-4feb-fd17-e27d400dd8cc"}
+``` python
+words_data <- data_2014 %>%
+  select(processed_content) %>%
+  unnest_tokens(word, processed_content)
+
+word_counts <- words_data %>%
+  count(word, sort = TRUE)
+
+head(word_counts)
+```
+
+::: {.output .display_data}
+
+A tibble: 6 × 2
+
+| word &lt;chr&gt; | n &lt;int&gt; |
+|---|---|
+| ebola  | 3964 |
+| health | 2486 |
+| new    | 1689 |
+| says   | 1137 |
+| may    |  972 |
+| can    |  965 |
+:::
+:::
+
+::: {.cell .code execution_count="36" colab="{\"base_uri\":\"https://localhost:8080/\",\"height\":437}" id="bnSnsRg5O5V5" outputId="09f581a8-7050-463c-8f97-dd4edbbb197e"}
+``` python
+wordcloud(word_counts$word, word_counts$n, max.words = 300, random.order = FALSE)
+```
+
+::: {.output .display_data}
+![](vertopal_589ed2136c744435951e82f2ed516c8a/440cf3d2a6b30d179b3e630c18ea604e334c16e0.png){height="420"
+width="420"}
+:::
+:::
+
+::: {.cell .code execution_count="37" colab="{\"base_uri\":\"https://localhost:8080/\",\"height\":286}" id="BEchiD6NHu2i" outputId="af4d5ad7-fddf-4dec-bd57-5e3ca510443d"}
+``` python
+words_data <- data_2014 %>%
+  select(processed_content, Source) %>%
+  unnest_tokens(word, processed_content)
+
+word_counts_by_source <- words_data %>%
+  count(Source, word, sort = TRUE)
+
+head(word_counts_by_source)
+```
+
+::: {.output .display_data}
+
+A tibble: 6 × 3
+
+| Source &lt;chr&gt; | word &lt;chr&gt; | n &lt;int&gt; |
+|---|---|---|
+| Reuters Health  | ebola  | 1221 |
+| NY Times Health | well   |  719 |
+| NY Times Health | ebola  |  682 |
+| GDN Health      | nhs    |  586 |
+| WSJ Health      | health |  518 |
+| BBC Health      | video  |  511 |
+:::
+:::
+
+::: {.cell .markdown id="FaGS_QT5CBpA"}
+# **III. Modelling** {#iii-modelling}
+:::
+
+::: {.cell .markdown id="e95R_sogUxDg"}
+## **1. Topic Extraction** {#1-topic-extraction}
+:::
+
+::: {.cell .markdown id="8sCHjByFCamF"}
+### **a. LDA** {#a-lda}
+:::
+
+::: {.cell .code execution_count="38" colab="{\"base_uri\":\"https://localhost:8080/\"}" id="v-xxhetgV-5w" outputId="f753b82e-993c-45c6-f0d6-781a5288ebf5"}
+``` python
+str(data_2014)
+```
+
+::: {.output .stream .stdout}
+    tibble [25,096 × 7] (S3: tbl_df/tbl/data.frame)
+     $ ID               : num [1:25096] 5.50e+17 5.50e+17 5.48e+17 5.48e+17 5.48e+17 ...
+     $ Source           : chr [1:25096] "Kaiser Health News" "Kaiser Health News" "Kaiser Health News" "Kaiser Health News" ...
+     $ Date             : Date[1:25096], format: "2014-12-30" "2014-12-29" ...
+     $ Content          : chr [1:25096] "RT @cspanwj: VIDEO: @jrovner, @KHNews Senior Correspondent, on #Medicare and the #ACA http://cs.pn/1B1PCuh http"| __truncated__ "How A State\u0092s Choice On Medicaid Expansion Affects Hospitals, @SarahVarney4 reports in @NewsHour: http://khne.ws/1A57NOj" "Some doctors who treat #Medicaid patients are going to get a big pay cut. How will it affect patients? http://khne.ws/1wD8dvD" "Ebola Doctor Makes Tough Choice To Save The Lives Of Two Colleagues http://khne.ws/1zhSfnF" ...
+     $ Year             : num [1:25096] 2014 2014 2014 2014 2014 ...
+     $ Date_numeric     : num [1:25096] 363 362 357 357 357 356 356 356 355 352 ...
+     $ processed_content: chr [1:25096] " video senior correspondent medicare aca" " state choice medicaid expansion affects hospitals reports " " doctors treat medicaid patients going get big pay cut will affect patients " "ebola doctor makes tough choice save lives two colleagues" ...
+:::
+:::
+
+::: {.cell .code execution_count="39" id="01NEg-0OX6u3"}
+``` python
+corpus <- VCorpus(VectorSource(data_2014$processed_content))
+```
+:::
+
+::: {.cell .code execution_count="40" id="kIkO-_1IBZt5"}
+``` python
+dtm <- DocumentTermMatrix(corpus, control = list(weighting = weightTfIdf))
+```
+:::
+
+::: {.cell .code execution_count="41" id="WQsKRFQeEd2W"}
+``` python
+dtm_matrix <- sparseMatrix(i = dtm$i, j = dtm$j, x = dtm$v,
+                           dims = dim(dtm),
+                           dimnames = list(rownames(dtm), colnames(dtm)))
+
+tokens <- colnames(dtm_matrix)
+```
+:::
+
+::: {.cell .code execution_count="42" id="ontcILX-E5wI"}
+``` python
+vocab <- create_vocabulary(tokens)
+vectorizer <- vocab_vectorizer(vocab)
+```
+:::
+
+::: {.cell .code execution_count="43" id="D2U41Pn2FAzs"}
+``` python
+tdm <- t(dtm_matrix)
+tcm <- tdm %*% dtm_matrix
+```
+:::
+
+::: {.cell .markdown id="5mgYKj4uFbWY"}
+For 10 Topics and their respetive top 10 terms:
+:::
+
+::: {.cell .code execution_count="44" colab="{\"base_uri\":\"https://localhost:8080/\"}" id="jDfQ3KPRFGcv" outputId="0e17900b-1760-4332-ac1a-fc74f497fedc"}
+``` python
+num_topics <- 10
+lda_model <- LDA$new(n_topics = num_topics, doc_topic_prior = 0.1, topic_word_prior = 0.01)
+doc_topic_distr <- lda_model$fit_transform(tcm, n_iter = 1000, convergence_tol = 0.01, n_check_convergence = 25)
+topic_terms <- lda_model$get_top_words(n = 10, topic_number = 1:num_topics)
+topic_terms_df <- data.frame(topic_terms)
+
+print(topic_terms_df)
+```
+
+::: {.output .stream .stdout}
+    INFO  [21:27:20.538] early stopping at 75 iteration
+    INFO  [21:27:28.501] early stopping at 50 iteration
+              X1         X2    X3       X4         X5     X6        X7        X8
+    1     health cigarettes  well     know        nhs cancer     video     video
+    2  obamacare       food  good   doctor     health  study      help    weight
+    3  insurance      audio   amp     life healthcare   drug marijuana     water
+    4        law    smoking   can   things    doctors   risk       can       fat
+    5       care    tobacco   age     well       free    may      live  bacteria
+    6      court       well   old medicine       care  drugs   surgery      lose
+    7   coverage      brain   new  parents       drug  heart      baby       run
+    8   abortion    smokers   day   living   medicare  blood   alcohol       way
+    9        new      risks today   likely       data  women cigarette challenge
+    10     plans    warning   eat     take        fda breast christmas       ill
+             X9      X10
+    1     ebola    ebola
+    2  outbreak  patient
+    3     cases hospital
+    4    africa    nurse
+    5       flu patients
+    6   liberia    video
+    7     virus   dallas
+    8      mers      cdc
+    9      case    tests
+    10     says      new
+:::
+:::
+
+::: {.cell .markdown id="sgApYbOICgAm"}
+### **b. Jaccard Similarity** {#b-jaccard-similarity}
+:::
+
+::: {.cell .code execution_count="45" id="4yAe-mEBGrU1"}
+``` python
+run_lda <- function(tcm, num_topics = 10, n_top_words = 10) {
+  lda_model <- LDA$new(n_topics = num_topics, doc_topic_prior = 0.1, topic_word_prior = 0.01)
+  lda_model$fit_transform(tcm, n_iter = 1000, convergence_tol = 0.01, n_check_convergence = 25)
+  top_terms <- lda_model$get_top_words(n = n_top_words)
+  return(top_terms)
+}
+```
+:::
+
+::: {.cell .code execution_count="46" colab="{\"base_uri\":\"https://localhost:8080/\"}" id="7K0tz7pgHABg" outputId="cd33e040-879a-4f9c-c75c-731f622936e5"}
+``` python
+n_runs <- 5
+topics_list <- vector("list", n_runs)
+
+for (i in seq_len(n_runs)) {
+  topics_list[[i]] <- run_lda(tcm)
+}
+```
+
+::: {.output .stream .stdout}
+    INFO  [21:27:42.530] early stopping at 75 iteration
+    INFO  [21:27:49.871] early stopping at 50 iteration
+    INFO  [21:28:03.286] early stopping at 75 iteration
+    INFO  [21:28:10.711] early stopping at 50 iteration
+    INFO  [21:28:23.906] early stopping at 75 iteration
+    INFO  [21:28:32.023] early stopping at 50 iteration
+    INFO  [21:28:45.831] early stopping at 75 iteration
+    INFO  [21:28:53.460] early stopping at 50 iteration
+    INFO  [21:29:06.732] early stopping at 75 iteration
+    INFO  [21:29:13.903] early stopping at 50 iteration
+:::
+:::
+
+::: {.cell .code execution_count="47" id="-9AkOwozHOMm"}
+``` python
+jaccard_index <- function(set1, set2) {
+  intersection <- length(intersect(set1, set2))
+  union <- length(union(set1, set2))
+  return(intersection / union)
+}
+```
+:::
+
+::: {.cell .code execution_count="48" id="mlwuU2WHHMvP"}
+``` python
+calculate_jaccard <- function(topics_list) {
+  n_topics <- length(topics_list[[1]])
+  jaccard_matrix <- matrix(0, nrow = n_topics, ncol = n_topics)
+  for (i in 1:n_topics) {
+    for (j in 1:n_topics) {
+      if (i != j) {
+        jaccard_matrix[i, j] <- jaccard_index(topics_list[[1]][[i]], topics_list[[2]][[j]])
+      }
+    }
+  }
+  return(jaccard_matrix)
+}
+```
+:::
+
+::: {.cell .code execution_count="49" colab="{\"base_uri\":\"https://localhost:8080/\"}" id="uQ7bP6xXHTxy" outputId="178199cb-7cd9-48ba-da74-9e4f32dd130b"}
+``` python
+jaccard_similarity <- calculate_jaccard(topics_list)
+print(jaccard_similarity)
+```
+
+::: {.output .stream .stdout}
+           [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12] [,13]
+      [1,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+      [2,]    1    0    0    0    0    0    0    0    0     0     0     0     0
+      [3,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+      [4,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+      [5,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+      [6,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+      [7,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+      [8,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+      [9,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [10,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [11,]    0    1    0    0    0    0    0    0    0     0     0     1     0
+     [12,]    0    0    0    0    0    0    0    0    0     0     1     0     0
+     [13,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [14,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [15,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [16,]    0    0    0    0    0    0    0    0    0     0     0     0     1
+     [17,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [18,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [19,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [20,]    0    0    0    1    0    0    0    0    0     0     0     0     0
+     [21,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [22,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [23,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [24,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [25,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [26,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [27,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [28,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [29,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [30,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [31,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [32,]    0    1    0    0    0    0    0    0    0     0     0     1     0
+     [33,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [34,]    0    0    0    0    0    0    0    0    0     0     1     0     0
+     [35,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [36,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [37,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [38,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [39,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [40,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [41,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [42,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [43,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [44,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [45,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [46,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [47,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [48,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [49,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [50,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [51,]    0    0    1    0    0    0    0    0    0     0     0     0     0
+     [52,]    0    1    0    0    0    0    0    0    0     0     0     1     0
+     [53,]    1    0    0    0    0    0    0    0    0     0     0     0     0
+     [54,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [55,]    0    0    0    0    0    0    1    0    0     0     0     0     0
+     [56,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [57,]    0    0    0    0    0    0    0    0    1     0     0     0     0
+     [58,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [59,]    0    0    0    0    0    1    0    0    0     0     0     0     0
+     [60,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [61,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [62,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [63,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [64,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [65,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [66,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [67,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [68,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [69,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [70,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [71,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [72,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [73,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [74,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [75,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [76,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [77,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [78,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [79,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [80,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [81,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [82,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [83,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [84,]    0    0    0    0    0    0    0    0    0     1     0     0     0
+     [85,]    0    0    0    1    0    0    0    0    0     0     0     0     0
+     [86,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [87,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [88,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [89,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [90,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [91,]    1    0    0    0    0    0    0    0    0     0     0     0     0
+     [92,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [93,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [94,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [95,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [96,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [97,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [98,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+     [99,]    0    0    0    0    0    0    0    0    0     0     0     0     0
+    [100,]    0    0    1    0    0    0    0    0    0     0     0     0     0
+           [,14] [,15] [,16] [,17] [,18] [,19] [,20] [,21] [,22] [,23] [,24] [,25]
+      [1,]     0     0     0     0     0     0     0     0     0     0     0     0
+      [2,]     0     0     0     0     0     0     0     0     0     0     0     0
+      [3,]     0     1     0     0     0     0     0     0     0     0     0     0
+      [4,]     0     0     0     0     0     0     0     0     0     0     0     0
+      [5,]     0     0     0     0     0     0     0     0     0     0     0     0
+      [6,]     0     0     0     0     0     0     0     0     0     0     0     0
+      [7,]     0     0     0     0     0     0     0     0     0     0     0     0
+      [8,]     0     0     0     0     0     0     0     0     0     0     0     0
+      [9,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [10,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [11,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [12,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [13,]     0     0     0     0     0     0     1     0     0     0     0     0
+     [14,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [15,]     0     0     1     0     0     0     0     0     0     0     0     0
+     [16,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [17,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [18,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [19,]     0     0     0     0     1     0     0     0     0     0     0     0
+     [20,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [21,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [22,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [23,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [24,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [25,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [26,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [27,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [28,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [29,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [30,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [31,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [32,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [33,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [34,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [35,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [36,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [37,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [38,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [39,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [40,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [41,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [42,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [43,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [44,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [45,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [46,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [47,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [48,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [49,]     0     0     0     0     0     0     0     1     0     0     0     0
+     [50,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [51,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [52,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [53,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [54,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [55,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [56,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [57,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [58,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [59,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [60,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [61,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [62,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [63,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [64,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [65,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [66,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [67,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [68,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [69,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [70,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [71,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [72,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [73,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [74,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [75,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [76,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [77,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [78,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [79,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [80,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [81,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [82,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [83,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [84,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [85,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [86,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [87,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [88,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [89,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [90,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [91,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [92,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [93,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [94,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [95,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [96,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [97,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [98,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [99,]     0     0     0     0     0     0     0     0     0     0     0     0
+    [100,]     0     0     0     0     0     0     0     0     0     0     0     0
+           [,26] [,27] [,28] [,29] [,30] [,31] [,32] [,33] [,34] [,35] [,36] [,37]
+      [1,]     0     0     0     0     0     0     0     0     0     0     0     0
+      [2,]     0     0     0     0     0     0     0     0     0     0     0     0
+      [3,]     0     0     0     0     0     0     0     0     0     0     0     0
+      [4,]     0     0     0     0     0     0     0     0     0     0     0     0
+      [5,]     0     0     0     0     0     0     0     0     0     0     0     0
+      [6,]     0     0     0     0     0     0     0     0     0     0     0     0
+      [7,]     0     0     0     0     0     0     0     0     0     0     0     0
+      [8,]     0     1     0     0     0     0     0     0     0     0     0     0
+      [9,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [10,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [11,]     0     0     0     0     0     1     0     0     0     0     0     0
+     [12,]     0     0     0     0     0     0     0     0     0     1     0     0
+     [13,]     0     0     0     0     0     0     0     1     0     0     0     0
+     [14,]     0     0     0     0     0     0     1     0     0     0     0     0
+     [15,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [16,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [17,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [18,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [19,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [20,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [21,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [22,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [23,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [24,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [25,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [26,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [27,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [28,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [29,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [30,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [31,]     0     0     0     0     0     0     0     0     1     0     0     0
+     [32,]     0     0     0     0     0     1     0     0     0     0     0     0
+     [33,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [34,]     0     0     0     0     0     0     0     0     0     1     0     0
+     [35,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [36,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [37,]     0     0     0     0     0     0     0     0     0     0     1     0
+     [38,]     0     0     0     0     0     0     1     0     0     0     0     0
+     [39,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [40,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [41,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [42,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [43,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [44,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [45,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [46,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [47,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [48,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [49,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [50,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [51,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [52,]     0     0     0     0     0     1     0     0     0     0     0     0
+     [53,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [54,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [55,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [56,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [57,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [58,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [59,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [60,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [61,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [62,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [63,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [64,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [65,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [66,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [67,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [68,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [69,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [70,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [71,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [72,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [73,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [74,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [75,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [76,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [77,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [78,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [79,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [80,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [81,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [82,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [83,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [84,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [85,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [86,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [87,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [88,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [89,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [90,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [91,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [92,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [93,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [94,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [95,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [96,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [97,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [98,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [99,]     1     0     0     0     0     0     0     0     0     0     0     0
+    [100,]     0     0     0     0     0     0     0     0     0     0     0     0
+           [,38] [,39] [,40] [,41] [,42] [,43] [,44] [,45] [,46] [,47] [,48] [,49]
+      [1,]     0     0     0     0     0     0     0     0     0     0     0     0
+      [2,]     0     0     0     0     0     0     0     0     0     0     0     0
+      [3,]     0     0     0     0     0     0     0     0     0     0     0     0
+      [4,]     0     0     0     0     0     0     0     0     0     0     0     0
+      [5,]     0     0     0     0     0     0     0     0     0     0     0     0
+      [6,]     0     0     0     0     0     0     0     0     0     0     0     0
+      [7,]     0     0     0     0     0     0     0     0     0     0     0     0
+      [8,]     0     0     0     0     0     0     0     0     0     0     0     0
+      [9,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [10,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [11,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [12,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [13,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [14,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [15,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [16,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [17,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [18,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [19,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [20,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [21,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [22,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [23,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [24,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [25,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [26,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [27,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [28,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [29,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [30,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [31,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [32,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [33,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [34,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [35,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [36,]     0     1     0     0     0     0     0     0     0     0     0     0
+     [37,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [38,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [39,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [40,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [41,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [42,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [43,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [44,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [45,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [46,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [47,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [48,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [49,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [50,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [51,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [52,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [53,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [54,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [55,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [56,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [57,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [58,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [59,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [60,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [61,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [62,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [63,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [64,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [65,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [66,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [67,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [68,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [69,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [70,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [71,]     0     0     0     1     0     0     0     0     0     0     0     0
+     [72,]     0     0     0     0     1     0     0     0     0     0     0     0
+     [73,]     0     0     0     0     0     0     1     0     0     0     0     0
+     [74,]     0     0     0     0     0     0     0     1     0     0     0     0
+     [75,]     0     0     0     0     0     0     0     0     0     1     0     0
+     [76,]     0     0     0     0     0     0     0     0     1     0     0     0
+     [77,]     0     0     0     0     0     1     0     0     0     0     0     0
+     [78,]     0     0     0     0     0     0     0     0     0     0     0     1
+     [79,]     0     0     0     0     0     0     0     0     0     0     1     0
+     [80,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [81,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [82,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [83,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [84,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [85,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [86,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [87,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [88,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [89,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [90,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [91,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [92,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [93,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [94,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [95,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [96,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [97,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [98,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [99,]     0     0     0     0     0     0     0     0     0     0     0     0
+    [100,]     0     0     0     0     0     0     0     0     0     0     0     0
+           [,50] [,51] [,52] [,53] [,54] [,55] [,56] [,57] [,58] [,59] [,60] [,61]
+      [1,]     0     0     0     0     0     0     0     0     0     0     1     0
+      [2,]     0     0     0     0     0     0     0     0     0     0     0     0
+      [3,]     0     0     0     0     0     0     0     0     0     0     0     0
+      [4,]     0     0     0     0     0     0     0     0     0     0     0     0
+      [5,]     0     0     0     0     1     0     0     0     0     0     0     0
+      [6,]     0     0     0     1     0     0     0     0     0     0     0     0
+      [7,]     0     0     0     0     0     0     0     0     0     0     0     0
+      [8,]     0     0     0     0     0     0     0     0     0     0     0     0
+      [9,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [10,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [11,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [12,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [13,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [14,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [15,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [16,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [17,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [18,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [19,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [20,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [21,]     0     0     0     0     0     0     0     0     0     1     0     0
+     [22,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [23,]     0     1     0     0     0     0     0     0     0     0     0     0
+     [24,]     0     0     0     0     0     0     0     1     0     0     0     0
+     [25,]     0     0     0     0     1     0     0     0     0     0     0     0
+     [26,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [27,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [28,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [29,]     0     0     0     0     0     0     0     0     0     0     1     0
+     [30,]     0     0     0     0     0     0     1     0     0     0     0     0
+     [31,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [32,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [33,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [34,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [35,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [36,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [37,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [38,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [39,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [40,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [41,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [42,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [43,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [44,]     0     0     0     0     0     0     0     0     0     0     1     0
+     [45,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [46,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [47,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [48,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [49,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [50,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [51,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [52,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [53,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [54,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [55,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [56,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [57,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [58,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [59,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [60,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [61,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [62,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [63,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [64,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [65,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [66,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [67,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [68,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [69,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [70,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [71,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [72,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [73,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [74,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [75,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [76,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [77,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [78,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [79,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [80,]     1     0     0     0     0     0     0     0     0     0     0     0
+     [81,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [82,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [83,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [84,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [85,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [86,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [87,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [88,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [89,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [90,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [91,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [92,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [93,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [94,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [95,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [96,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [97,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [98,]     0     0     1     0     0     0     0     0     0     0     0     0
+     [99,]     0     0     0     0     0     0     0     0     0     0     0     0
+    [100,]     0     0     0     0     0     0     0     0     0     0     0     0
+           [,62] [,63] [,64] [,65] [,66] [,67] [,68] [,69] [,70] [,71] [,72] [,73]
+      [1,]     0     0     0     0     0     0     0     0     0     0     0     0
+      [2,]     0     0     0     0     0     0     0     0     0     0     0     0
+      [3,]     0     0     0     0     0     0     0     0     0     0     0     0
+      [4,]     0     0     0     0     0     0     0     0     0     0     0     0
+      [5,]     0     0     0     0     0     0     0     0     0     0     0     0
+      [6,]     0     0     0     0     0     0     0     0     0     0     0     0
+      [7,]     0     0     0     0     0     0     0     0     0     0     0     0
+      [8,]     0     0     0     0     0     0     0     0     0     0     0     0
+      [9,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [10,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [11,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [12,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [13,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [14,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [15,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [16,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [17,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [18,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [19,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [20,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [21,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [22,]     0     0     0     0     0     0     0     0     0     1     0     0
+     [23,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [24,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [25,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [26,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [27,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [28,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [29,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [30,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [31,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [32,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [33,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [34,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [35,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [36,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [37,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [38,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [39,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [40,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [41,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [42,]     1     0     0     0     0     0     0     0     0     0     0     0
+     [43,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [44,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [45,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [46,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [47,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [48,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [49,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [50,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [51,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [52,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [53,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [54,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [55,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [56,]     0     0     0     0     0     0     0     0     0     1     0     0
+     [57,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [58,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [59,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [60,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [61,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [62,]     0     1     0     0     0     0     0     0     0     0     0     0
+     [63,]     1     0     0     0     0     0     0     0     0     0     0     0
+     [64,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [65,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [66,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [67,]     0     0     0     0     1     0     0     0     0     0     0     0
+     [68,]     0     0     0     1     0     0     0     0     0     0     0     0
+     [69,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [70,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [71,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [72,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [73,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [74,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [75,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [76,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [77,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [78,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [79,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [80,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [81,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [82,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [83,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [84,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [85,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [86,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [87,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [88,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [89,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [90,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [91,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [92,]     0     0     0     0     0     0     0     0     0     1     0     0
+     [93,]     0     0     0     0     0     0     1     0     0     0     0     0
+     [94,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [95,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [96,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [97,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [98,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [99,]     0     0     0     0     0     0     0     0     0     0     0     0
+    [100,]     0     0     0     0     0     0     0     0     0     0     0     0
+           [,74] [,75] [,76] [,77] [,78] [,79] [,80] [,81] [,82] [,83] [,84] [,85]
+      [1,]     0     0     0     0     0     0     0     0     0     0     0     0
+      [2,]     0     0     0     0     0     0     0     0     0     0     0     0
+      [3,]     0     0     0     0     0     0     0     0     0     0     0     0
+      [4,]     0     0     0     0     0     0     0     0     0     0     0     0
+      [5,]     0     0     0     0     0     0     0     0     0     0     0     0
+      [6,]     0     0     0     0     0     0     0     0     0     0     0     0
+      [7,]     0     0     0     0     0     0     0     0     0     0     0     0
+      [8,]     0     0     0     0     0     0     0     0     0     0     0     0
+      [9,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [10,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [11,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [12,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [13,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [14,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [15,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [16,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [17,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [18,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [19,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [20,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [21,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [22,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [23,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [24,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [25,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [26,]     0     0     1     0     0     0     0     0     0     0     0     0
+     [27,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [28,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [29,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [30,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [31,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [32,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [33,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [34,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [35,]     0     0     0     0     0     1     0     0     0     0     0     0
+     [36,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [37,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [38,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [39,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [40,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [41,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [42,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [43,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [44,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [45,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [46,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [47,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [48,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [49,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [50,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [51,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [52,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [53,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [54,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [55,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [56,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [57,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [58,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [59,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [60,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [61,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [62,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [63,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [64,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [65,]     1     0     0     0     0     0     0     0     0     0     0     0
+     [66,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [67,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [68,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [69,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [70,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [71,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [72,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [73,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [74,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [75,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [76,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [77,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [78,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [79,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [80,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [81,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [82,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [83,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [84,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [85,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [86,]     0     0     0     0     0     0     0     0     0     1     0     0
+     [87,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [88,]     0     0     0     0     0     0     0     0     0     0     1     0
+     [89,]     0     0     0     0     0     0     0     0     0     0     0     1
+     [90,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [91,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [92,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [93,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [94,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [95,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [96,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [97,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [98,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [99,]     0     0     0     0     0     0     0     0     0     0     0     0
+    [100,]     0     0     0     0     0     0     0     0     0     0     0     0
+           [,86] [,87] [,88] [,89] [,90] [,91] [,92] [,93] [,94] [,95] [,96] [,97]
+      [1,]     0     0     0     0     0     1     0     0     0     0     0     0
+      [2,]     0     0     0     0     0     0     0     0     0     0     0     0
+      [3,]     0     0     0     0     0     0     0     0     0     0     0     0
+      [4,]     0     0     0     0     0     0     0     0     0     0     0     0
+      [5,]     0     0     0     0     0     0     0     0     0     0     1     0
+      [6,]     0     0     0     0     0     0     0     0     0     0     0     0
+      [7,]     0     0     0     0     0     0     0     0     0     0     0     0
+      [8,]     0     0     0     0     0     0     0     0     0     0     0     0
+      [9,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [10,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [11,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [12,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [13,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [14,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [15,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [16,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [17,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [18,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [19,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [20,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [21,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [22,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [23,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [24,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [25,]     0     0     0     0     0     0     0     0     0     0     1     0
+     [26,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [27,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [28,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [29,]     0     0     0     0     0     1     0     0     0     0     0     0
+     [30,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [31,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [32,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [33,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [34,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [35,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [36,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [37,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [38,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [39,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [40,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [41,]     0     0     0     0     0     0     1     0     0     0     0     0
+     [42,]     0     0     0     0     0     0     0     0     0     1     0     0
+     [43,]     0     0     0     0     0     0     0     0     1     0     0     0
+     [44,]     0     0     0     0     0     1     0     0     0     0     0     0
+     [45,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [46,]     0     0     0     0     0     0     0     1     0     0     0     0
+     [47,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [48,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [49,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [50,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [51,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [52,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [53,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [54,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [55,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [56,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [57,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [58,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [59,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [60,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [61,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [62,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [63,]     0     0     0     0     0     0     0     0     0     1     0     0
+     [64,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [65,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [66,]     0     0     0     0     0     0     0     1     0     0     0     0
+     [67,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [68,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [69,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [70,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [71,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [72,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [73,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [74,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [75,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [76,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [77,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [78,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [79,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [80,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [81,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [82,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [83,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [84,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [85,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [86,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [87,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [88,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [89,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [90,]     1     0     0     0     0     0     0     0     0     0     0     0
+     [91,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [92,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [93,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [94,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [95,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [96,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [97,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [98,]     0     0     0     0     0     0     0     0     0     0     0     0
+     [99,]     0     0     0     0     0     0     0     0     0     0     0     0
+    [100,]     0     0     0     0     0     0     0     0     0     0     0     0
+           [,98] [,99] [,100]
+      [1,]     0     0      0
+      [2,]     0     0      0
+      [3,]     0     0      0
+      [4,]     0     0      0
+      [5,]     0     0      0
+      [6,]     0     0      0
+      [7,]     0     0      0
+      [8,]     0     0      0
+      [9,]     0     0      0
+     [10,]     0     0      0
+     [11,]     0     0      0
+     [12,]     0     0      0
+     [13,]     0     0      0
+     [14,]     0     0      0
+     [15,]     0     0      0
+     [16,]     0     0      0
+     [17,]     0     0      0
+     [18,]     0     0      0
+     [19,]     0     0      0
+     [20,]     0     0      0
+     [21,]     0     0      0
+     [22,]     0     0      0
+     [23,]     0     0      0
+     [24,]     0     0      0
+     [25,]     0     0      0
+     [26,]     0     0      0
+     [27,]     0     0      0
+     [28,]     0     0      0
+     [29,]     0     0      0
+     [30,]     0     0      0
+     [31,]     0     0      0
+     [32,]     0     0      0
+     [33,]     0     0      0
+     [34,]     0     0      0
+     [35,]     0     0      0
+     [36,]     0     0      0
+     [37,]     0     0      0
+     [38,]     0     0      0
+     [39,]     0     0      0
+     [40,]     0     0      0
+     [41,]     0     0      0
+     [42,]     0     0      0
+     [43,]     0     0      0
+     [44,]     0     0      0
+     [45,]     0     0      1
+     [46,]     0     0      0
+     [47,]     0     0      0
+     [48,]     1     0      0
+     [49,]     0     0      0
+     [50,]     0     0      0
+     [51,]     0     0      0
+     [52,]     0     0      0
+     [53,]     0     0      0
+     [54,]     0     0      0
+     [55,]     0     0      0
+     [56,]     0     0      0
+     [57,]     0     0      0
+     [58,]     0     0      0
+     [59,]     0     0      0
+     [60,]     0     0      0
+     [61,]     0     0      0
+     [62,]     0     0      0
+     [63,]     0     0      0
+     [64,]     0     0      0
+     [65,]     0     0      0
+     [66,]     0     0      0
+     [67,]     0     0      0
+     [68,]     0     0      0
+     [69,]     0     0      0
+     [70,]     0     0      0
+     [71,]     0     0      0
+     [72,]     0     0      0
+     [73,]     0     0      0
+     [74,]     0     0      0
+     [75,]     0     0      0
+     [76,]     0     0      0
+     [77,]     0     0      0
+     [78,]     0     0      0
+     [79,]     0     0      0
+     [80,]     0     0      0
+     [81,]     0     0      0
+     [82,]     0     0      0
+     [83,]     0     0      0
+     [84,]     0     0      0
+     [85,]     0     0      0
+     [86,]     0     0      0
+     [87,]     0     0      0
+     [88,]     0     0      0
+     [89,]     0     0      0
+     [90,]     0     0      0
+     [91,]     0     0      0
+     [92,]     0     0      0
+     [93,]     0     0      0
+     [94,]     0     0      0
+     [95,]     0     0      0
+     [96,]     0     0      0
+     [97,]     0     0      0
+     [98,]     0     0      0
+     [99,]     0     0      0
+    [100,]     0     0      0
+:::
+:::
+
+::: {.cell .code execution_count="50" colab="{\"base_uri\":\"https://localhost:8080/\",\"height\":437}" id="DdnRYz1SD33b" outputId="2fe00f89-dd73-4e84-a51e-b841981eece1"}
+``` python
+jaccard_df <- reshape2::melt(as.matrix(jaccard_similarity))
+colnames(jaccard_df) <- c("Topic1", "Topic2", "JaccardIndex")
+
+heatmap_plot <- ggplot(jaccard_df, aes(x = Topic1, y = Topic2, fill = JaccardIndex)) +
+  geom_tile(color = "white") +
+  scale_fill_gradientn(colors = c("grey", "yellow", "red"), values = scales::rescale(c(0, 0.5, 1))) +
+  geom_text(aes(label = ifelse(JaccardIndex > 0.5, sprintf("%.2f", JaccardIndex), "")), size = 3, color = "black") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1),
+        axis.text.y = element_text(angle = 45, hjust = 1, vjust = 1)) +
+  ggtitle("Jaccard Similarity Between Topics") +
+  xlab("Topic Number") +
+  ylab("Topic Number")
+
+
+print(heatmap_plot)
+```
+
+::: {.output .display_data}
+![](vertopal_589ed2136c744435951e82f2ed516c8a/f5ea06680cc683c48306fc2d0272601d1d2433a2.png){height="420"
+width="420"}
+:::
+:::
+
+::: {.cell .markdown id="vfsxqILkCki7"}
+### **c. Coherence Similarity** {#c-coherence-similarity}
+:::
+
+::: {.cell .code execution_count="51" id="7x7JPUjtHvST"}
+``` python
+run_lda_and_coherence <- function(tcm, dtm_matrix, num_topics, n_top_words = 10) {
+  lda_model <- LDA$new(n_topics = num_topics, doc_topic_prior = 0.1, topic_word_prior = 0.01)
+  lda_model$fit_transform(tcm, n_iter = 1000, convergence_tol = 0.01, n_check_convergence = 25)
+
+  top_terms <- lda_model$get_top_words(n = n_top_words)
+  top_terms_matrix <- sapply(top_terms, function(terms) terms)
+
+  phi <- matrix(0, nrow = length(top_terms), ncol = ncol(dtm_matrix))
+  colnames(phi) <- colnames(dtm_matrix)
+  rownames(phi) <- paste("Topic", 1:length(top_terms))
+
+  for (i in seq_along(top_terms)) {
+    phi[i, top_terms[[i]]] <- 1
+  }
+  coherence <- CalcProbCoherence(phi = phi, dtm = dtm_matrix, M = n_top_words)
+  return(mean(coherence))
+}
+```
+:::
+
+::: {.cell .code execution_count="52" colab="{\"base_uri\":\"https://localhost:8080/\"}" id="AtrOTZrfIPLc" outputId="a1f2a14b-739f-4294-cf91-069326828c13"}
+``` python
+topic_range <- seq(2, 20, by = 2)
+coherence_scores <- sapply(topic_range, function(k) run_lda_and_coherence(tcm, dtm_matrix, k))
+```
+
+::: {.output .stream .stdout}
+    INFO  [21:29:23.240] early stopping at 50 iteration
+    INFO  [21:29:29.242] early stopping at 50 iteration
+    INFO  [21:29:38.624] early stopping at 50 iteration
+    INFO  [21:29:45.909] early stopping at 50 iteration
+    INFO  [21:29:58.968] early stopping at 75 iteration
+    INFO  [21:30:07.842] early stopping at 50 iteration
+    INFO  [21:30:23.584] early stopping at 75 iteration
+    INFO  [21:30:30.621] early stopping at 50 iteration
+    INFO  [21:30:44.727] early stopping at 75 iteration
+    INFO  [21:30:52.680] early stopping at 50 iteration
+    INFO  [21:31:07.653] early stopping at 75 iteration
+    INFO  [21:31:15.600] early stopping at 50 iteration
+    INFO  [21:31:30.218] early stopping at 75 iteration
+    INFO  [21:31:38.065] early stopping at 50 iteration
+    INFO  [21:31:52.987] early stopping at 75 iteration
+    INFO  [21:32:00.689] early stopping at 50 iteration
+    INFO  [21:32:20.364] early stopping at 100 iteration
+    INFO  [21:32:28.377] early stopping at 50 iteration
+    INFO  [21:32:47.832] early stopping at 100 iteration
+    INFO  [21:32:56.150] early stopping at 50 iteration
+:::
+:::
+
+::: {.cell .code execution_count="53" colab="{\"base_uri\":\"https://localhost:8080/\",\"height\":437}" id="oSBfOaadIpst" outputId="9d78630e-9768-44bb-f359-dc857382f029"}
+``` python
+coherence_data <- data.frame(Topics = topic_range, Coherence = coherence_scores)
+
+ggplot(coherence_data, aes(x = Topics, y = Coherence)) +
+  geom_line() +
+  geom_point() +
+  theme_minimal() +
+  ggtitle("Topic Coherence Analysis") +
+  xlab("Number of Topics") +
+  ylab("Average Coherence Score")
+```
+
+::: {.output .display_data}
+![](vertopal_589ed2136c744435951e82f2ed516c8a/347b0416b95dfe86342a88d7b16f6d37e90ebe68.png){height="420"
+width="420"}
+:::
+:::
+
+::: {.cell .markdown id="qb40auPICwJq"}
+## **2. Association Rule Mining** {#2-association-rule-mining}
+:::
+
+::: {.cell .code execution_count="54" colab="{\"base_uri\":\"https://localhost:8080/\",\"height\":975}" id="35iHVb9bD-yO" outputId="948ae6b9-36b3-4555-9870-ec1b946cee79"}
+``` python
+tweets_list <- strsplit(as.character(data_2014$processed_content), " ")
+trans <- as(tweets_list, "transactions")
+
+frequent_itemsets <- eclat(trans, parameter = list(supp = 0.01, maxlen = 5))
+
+rules <- ruleInduction(frequent_itemsets, trans, confidence = 0.5, control = list(verbose = TRUE))
+
+interest_measures <- interestMeasure(rules, trans, measure=c("lift", "leverage"))
+
+plot(rules, method = "graph", control = list(type = "items"))
+
+high_lift_rules <- subset(rules, lift > 6)
+inspect(high_lift_rules)
+```
+
+::: {.output .stream .stdout}
+    Eclat
+
+    parameter specification:
+     tidLists support minlen maxlen            target  ext
+        FALSE    0.01      1      5 frequent itemsets TRUE
+
+    algorithmic control:
+     sparse sort verbose
+          7   -2    TRUE
+
+    Absolute minimum support count: 250 
+
+    create itemset ... 
+    set transactions ...[17171 item(s), 25096 transaction(s)] done [0.19s].
+    sorting and recoding items ... [83 item(s)] done [0.00s].
+    creating sparse bit matrix ... [83 row(s), 25096 column(s)] done [0.00s].
+    writing  ... [110 set(s)] done [0.02s].
+    Creating S4 object  ... done [0.00s].
+    Available control parameters (with default values):
+    layout	 =  stress
+    circular	 =  FALSE
+    ggraphdots	 =  NULL
+    edges	 =  <environment>
+    nodes	 =  <environment>
+    nodetext	 =  <environment>
+    colors	 =  c("#EE0000FF", "#EEEEEEFF")
+    engine	 =  ggplot2
+    max	 =  100
+    verbose	 =  FALSE
+        lhs      rhs      support    confidence lift     itemset
+    [1] {law} => {health} 0.01406599 0.7861915  8.272647 3      
+:::
+
+::: {.output .display_data}
+![](vertopal_589ed2136c744435951e82f2ed516c8a/f87ad1f2f3e2548a1ac5a5867dc7e353e8452e96.png){height="420"
+width="420"}
+:::
+:::
+
+::: {.cell .code execution_count="55" colab="{\"base_uri\":\"https://localhost:8080/\"}" id="3mpn_axxI8J0" outputId="ec5ea85c-1b34-4e22-f369-a096fc52ce3e"}
+``` python
+high_lift_rules <- subset(rules, lift > 6)
+inspect(high_lift_rules)
+```
+
+::: {.output .stream .stdout}
+        lhs      rhs      support    confidence lift     itemset
+    [1] {law} => {health} 0.01406599 0.7861915  8.272647 3      
+:::
+:::
